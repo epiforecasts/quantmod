@@ -97,7 +97,8 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
   cv_mat = matrix(NA, length(lambda), length(tau))
   lambda_min = rep(NA, length(tau))
   for (j in 1:length(tau)) {
-    cv_mat[,j] = quantile_loss(yhat[,,j], y, tau[j]) / n
+    num_test_j = colSums(!is.na(yhat[,,j]))
+    cv_mat[,j] = quantile_loss(yhat[,,j], y, tau[j]) / num_test_j
     lambda_min[j] = lambda[which.min(cv_mat[,j])]
   }
 

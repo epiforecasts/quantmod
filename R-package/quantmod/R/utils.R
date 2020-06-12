@@ -48,7 +48,7 @@ enlist = function(...) {
 
 quantile_loss = function(yhat, y, tau) {
   yhat = matrix(yhat, nrow=length(y))
-  return(colSums(pmax(tau*(y-yhat), (tau-1)*(y-yhat))))
+  return(colSums(pmax(tau*(y-yhat), (tau-1)*(y-yhat)), na.rm=TRUE))
 }
 
 #' Convenience functions for log padding
