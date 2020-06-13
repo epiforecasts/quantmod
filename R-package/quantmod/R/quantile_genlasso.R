@@ -126,7 +126,7 @@ quantile_genlasso = function(x, y, d, tau, lambda, weights=NULL,
   if (standardize) {
     bx = apply(x,2,mean)
     sx = apply(x,2,sd)
-    sx[sqrt(.Machine$double.eps)] = 1 # Don't divide by zero!
+    sx[sx < sqrt(.Machine$double.eps)] = 1 # Don't divide by zero!
     x = scale(x,bx,sx)
   }
 
