@@ -290,29 +290,30 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   # Group equality constraints, if needed
   labels = unique(tau_groups); num_labels = length(labels)
   if (num_labels < r) {
+    B = Matrix(0, nrow=p*(r-num_labels), ncol=P+N, sparse=TRUE)
     Ipp = Diagonal(p)
-    nrowA = nrow(model$A)
-    model$A = rbind(model$A, Matrix(0, nrow=p*(r-num_labels), ncol=P+N, sparse=TRUE))
+    count = 0
     for (label in labels) {
       ind = which(tau_groups == label)
       if (length(ind) > 1) { 
         for (k in 1:(length(ind)-1)) {
-          model$A[nrowA + (k-1)*p + 1:p, (ind[k]-1)*p + 1:p] = -Ipp
-          model$A[nrowA + (k-1)*p + 1:p, (ind[k+1]-1)*p + 1:p] = Ipp
-          model$sense[nrowA + (k-1)*p + 1:p] = equal_sign
-          model$rhs[nrowA + (k-1)*p + 1:p] = 0
+          B[count + (k-1)*p + 1:p, (ind[k]-1)*p + 1:p] = -Ipp
+          B[count + (k-1)*p + 1:p, (ind[k+1]-1)*p + 1:p] = Ipp
         }
-        nrowA = nrowA + (length(ind)-1)*p
+        count = count + (length(ind)-1)*p
       }
     }
+    model$A = rbind(model$A, B)
+    model$sense = c(model$sense, rep(equal_sign, p*(r-num_labels)))
+    model$rhs = c(model$rhs, rep(0, p*(r-num_labels)))
   }
   
   # Unit sum constraints on alpha, if we're asked to
   if (unit_sum) {
     vec = rep(1,p); if (intercept) vec[1] = 0
-    nrowA = nrow(model$A)
-    model$A = rbind(model$A, Matrix(0, nrow=r, ncol=P+N, sparse=TRUE))
-    for (k in 1:r) model$A[nrowA + k, (k-1)*p + 1:p] = vec
+    B = Matrix(0, nrow=r, ncol=P+N, sparse=TRUE)
+    for (k in 1:r) B[k, (k-1)*p + 1:p] = vec
+    model$A = rbind(model$A, B)
     model$sense = c(model$sense, rep(equal_sign, r))
     model$rhs = c(model$rhs, rep(1, r))
   }
@@ -344,14 +345,14 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
 
     # Now implement the noncrossing constraints
     n0 = dim(q0)[1]
-    nrowA = nrow(model$A)
-    model$A = rbind(model$A, Matrix(0, nrow=n0*(r-1), ncol=N+P, sparse=TRUE))
+    B = Matrix(0, nrow=n0*(r-1), ncol=N+P, sparse=TRUE)
     for (k in 1:(r-1)) {
-      model$A[nrowA + (k-1)*n0 + 1:n0, (k-1)*p + 1:p] = -q0[,,k]
-      model$A[nrowA + (k-1)*n0 + 1:n0, k*p + 1:p] = q0[,,k+1]
-      model$sense[nrowA + (k-1)*n0 + 1:n0] = ">="
-      model$rhs[nrowA + (k-1)*n0 + 1:n0] = 0
+      B[(k-1)*n0 + 1:n0, (k-1)*p + 1:p] = -q0[,,k]
+      B[(k-1)*n0 + 1:n0, k*p + 1:p] = q0[,,k+1]
     }
+    model$A = rbind(model$A, B)
+    model$sense = c(model$sense, rep(">=", n0*(r-1)))
+    model$rhs = c(model$rhs, rep(0, n0*(r-1)))
   }
 
   # Call Gurobi's LP solver, store results
