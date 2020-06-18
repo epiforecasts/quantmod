@@ -16,7 +16,8 @@ points) x (number or ensemble components) x (number of quantile levels).}
 \item{y}{Vector of responses (whose quantiles are being predicted by
 \code{qarr}).}
 
-\item{tau}{Vector of quantile levels at which predictions are made.}
+\item{tau}{Vector of quantile levels at which predictions are made. Assumed
+to be distinct, and sorted in increasing order.}
 
 \item{weights}{Vector of observation weights (to be used in the loss
 function). Default is NULL, which is interpreted as a weight of 1 for each
@@ -42,7 +43,7 @@ TRUE. Note: this option only matters when there is more than group of
 ensemble weights, as determined by \code{tau_groups}. See details.}
 
 \item{q0}{Array of points used to define the noncrossing
-constraints. Must haev dimension (number of points) x (number of ensemble
+constraints. Must have dimension (number of points) x (number of ensemble
 components) x (number of quantile levels). Default is NULL, which means
 that we consider noncrossing constraints at the training points
 \code{qarr}.}

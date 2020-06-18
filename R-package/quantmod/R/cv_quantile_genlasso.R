@@ -142,8 +142,7 @@ plot.cv_quantile_genlasso = function(obj, legend_pos="topleft") {
 #' Predict function for cv_quantile_genlasso object
 #'
 #' Predict the conditional quantiles at a new set of predictor variables, using
-#' the generalized lasso coefficients stored in a \code{cv_quantile_genlasso}
-#' object.
+#' the generalized lasso coefficients tuned by cross-validation.
 #'
 #' @details This just calls the \code{predict} function on the
 #'   \code{quantile_genlasso} that is stored within the given 

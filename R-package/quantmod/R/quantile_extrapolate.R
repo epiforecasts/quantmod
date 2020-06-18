@@ -11,15 +11,14 @@
 #' @param tau_out Vector of quantile levels at which to perform
 #'   extrapolation. Default is a sequence of 23 quantile levels from 0.01 to
 #'   0.99.
-#' @param sort Should the quantile estimates be sorted? Default is FALSE. Note:
-#'   this option only makes sense if the values in the stored \code{tau} vector
-#'   are distinct, and sorted in increasing order.  
-#' @param iso Should the quantile estimates be passed through isotonic
-#'   regression? Default is FALSE; if TRUE, takes priority over
-#'   \code{sort}. Note: this option only makes sense if the values in the stored 
-#'   \code{tau} vector are distinct, and sorted in increasing order.  
-#' @param nonneg: should the quantile estimates be truncated at 0? Natural for
-#'   count data. Default is FALSE. 
+#' @param sort Should the returned quantile estimates be sorted? Default is
+#'   TRUE. 
+#' @param iso Should the returned quantile estimates be passed through isotonic
+#'   regression? Default is FALSE; if TRUE, takes priority over \code{sort}.
+#' @param nonneg Should the returned quantile estimates be truncated at 0?
+#'   Natural for count data. Default is FALSE.
+#' @param round Should the returned quantile estimates be rounded? Natural for
+#'   count data. Default is FALSE.
 #' @param qfun_left,qfun_right Quantile functions on which to base extrapolation
 #'   in the left and right tails, respectively; each must be a function whose
 #'   first two arguments are a quantile level and a distribution parameter (such
@@ -143,10 +142,9 @@ quantile_extrapolate_v = function(tau, qvals, tau_out=c(0.01, 0.025, seq(0.05,
     }
   }
 
-  # Run isotonic regression, sort, truncated, round, if we're asked to (and make
-  # sure to preserve NAs)
+  # Run isotonic regression, sort, truncated, round, if we're asked to
   o = which(!is.na(qvals_out))
-  if (sort) qvals_out[o] = sort(qvals_out[o])
+  if (sort && !iso) qvals_out[o] = sort(qvals_out[o])
   if (iso) qvals_out[o] = isoreg(qvals_out[o])$yf
   if (nonneg) qvals_out = pmax(qvals_out,0)
   if (round) qvals_out = round(qvals_out)

@@ -23,14 +23,17 @@ set of quantiles, at the same (common) quantile levels, given by
 extrapolation. Default is a sequence of 23 quantile levels from 0.01 to
 0.99.}
 
-\item{sort}{Should the quantile estimates be sorted? Default is FALSE. Note:
-this option only makes sense if the values in the stored \code{tau} vector
-are distinct, and sorted in increasing order.}
+\item{sort}{Should the returned quantile estimates be sorted? Default is
+TRUE.}
 
-\item{iso}{Should the quantile estimates be passed through isotonic
-regression? Default is FALSE; if TRUE, takes priority over
-\code{sort}. Note: this option only makes sense if the values in the stored 
-\code{tau} vector are distinct, and sorted in increasing order.}
+\item{iso}{Should the returned quantile estimates be passed through isotonic
+regression? Default is FALSE; if TRUE, takes priority over \code{sort}.}
+
+\item{nonneg}{Should the returned quantile estimates be truncated at 0?
+Natural for count data. Default is FALSE.}
+
+\item{round}{Should the returned quantile estimates be rounded? Natural for
+count data. Default is FALSE.}
 
 \item{qfun_left, qfun_right}{Quantile functions on which to base extrapolation
 in the left and right tails, respectively; each must be a function whose
@@ -58,9 +61,6 @@ is used to estimate quantiles in the middle.}
 \item{param0, param1}{TODO}
 
 \item{grid_size, tol, maxiter}{TODO}
-
-\item{nonneg:}{should the quantile estimates be truncated at 0? Natural for
-count data. Default is FALSE.}
 }
 \value{
 A matrix of dimension (number of rows in \code{qvals}) x (length of 
