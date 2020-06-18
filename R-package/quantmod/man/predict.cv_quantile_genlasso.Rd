@@ -9,8 +9,7 @@
 }
 \description{
 Predict the conditional quantiles at a new set of predictor variables, using
-the generalized lasso coefficients stored in a \code{cv_quantile_genlasso}
-object.
+the generalized lasso coefficients tuned by cross-validation.
 }
 \details{
 This just calls the \code{predict} function on the

@@ -9,7 +9,7 @@
 }
 \description{
 Predict the conditional quantiles at a new set of predictor variables, using
-the generalized lasso coefficients at particular tau or lambda values.
+the generalized lasso coefficients at given tau or lambda values.
 }
 \details{
 This function operates as in the \code{predict.quantile_genlasso} 

@@ -10,15 +10,15 @@
 \item{obj}{The \code{quantile_genlasso} object.}
 
 \item{s}{Vector of integers specifying the tau and lambda values to consider
-for predictions; for each \code{i} in this vector, a prediction is made at 
-quantile level \code{tau[i]} and tuning parameter value \code{lambda[i]},
-according to the \code{tau} and \code{lambda} vectors stored in the given  
-\code{quantile_genlasso} object \code{obj}. (Said differently, \code{s} 
-specifies the columns of \code{obj$beta} to use for the predictions.)
-Default is NULL, which means that all tau and lambda values will be
-considered.}
+for coefficients; for each \code{i} in this vector, coefficients are 
+returned at quantile level \code{tau[i]} and tuning parameter value
+\code{lambda[i]}, according to the \code{tau} and \code{lambda} vectors
+stored in the given \code{quantile_genlasso} object \code{obj}. (Said
+differently, \code{s} specifies the columns of \code{obj$beta} to retrieve
+for the coefficients.)  Default is NULL, which means that all tau and
+lambda values will be considered.}
 }
 \description{
-Retrieve coefficients for estimating the conditional quantiles, using the
-generalized lasso coefficients at particular tau or lambda values.
+Retrieve generalized lasso coefficients for estimating the conditional
+quantiles at specified tau or lambda values.
 }

@@ -270,18 +270,18 @@ quantile_genlasso_lp = function(x, y, d, tau, lambda, weights, no_pen_rows,
 
 #' Coef function for quantile_genlasso object
 #'
-#' Retrieve coefficients for estimating the conditional quantiles, using the
-#' generalized lasso coefficients at particular tau or lambda values. 
+#' Retrieve generalized lasso coefficients for estimating the conditional
+#' quantiles at specified tau or lambda values. 
 #' 
 #' @param obj The \code{quantile_genlasso} object.
 #' @param s Vector of integers specifying the tau and lambda values to consider
-#'   for predictions; for each \code{i} in this vector, a prediction is made at 
-#'   quantile level \code{tau[i]} and tuning parameter value \code{lambda[i]},
-#'   according to the \code{tau} and \code{lambda} vectors stored in the given  
-#'   \code{quantile_genlasso} object \code{obj}. (Said differently, \code{s} 
-#'   specifies the columns of \code{obj$beta} to use for the predictions.)
-#'   Default is NULL, which means that all tau and lambda values will be
-#'   considered.
+#'   for coefficients; for each \code{i} in this vector, coefficients are 
+#'   returned at quantile level \code{tau[i]} and tuning parameter value
+#'   \code{lambda[i]}, according to the \code{tau} and \code{lambda} vectors
+#'   stored in the given \code{quantile_genlasso} object \code{obj}. (Said
+#'   differently, \code{s} specifies the columns of \code{obj$beta} to retrieve
+#'   for the coefficients.)  Default is NULL, which means that all tau and
+#'   lambda values will be considered.
 #' 
 #' @export
 
@@ -295,30 +295,30 @@ coef.quantile_genlasso = function(obj, s=NULL) {
 #' Predict function for quantile_genlasso object
 #'
 #' Predict the conditional quantiles at a new set of predictor variables, using
-#' the generalized lasso coefficients at particular tau or lambda values.
+#' the generalized lasso coefficients at specified tau or lambda values. 
 #' 
 #' @param obj The \code{quantile_genlasso} object.
 #' @param newx Matrix of new predictor variables at which predictions should
-#'   be made; if missing, the original (training) predictors are used.
+#'   be made.
 #' @param s Vector of integers specifying the tau and lambda values to consider
-#'   for predictions; for each \code{i} in this vector, a prediction is made at 
+#'   for predictions; for each \code{i} in this vector, predictions are made at  
 #'   quantile level \code{tau[i]} and tuning parameter value \code{lambda[i]},
 #'   according to the \code{tau} and \code{lambda} vectors stored in the given  
 #'   \code{quantile_genlasso} object \code{obj}. (Said differently, \code{s} 
 #'   specifies the columns of \code{object$beta} to use for the predictions.)
 #'   Default is NULL, which means that all tau and lambda values will be
 #'   considered. 
-#' @param sort Should the quantile estimates be sorted? Default is FALSE. Note:
-#'   this option only makes sense if the values in the stored \code{tau} vector
-#'   are distinct, and sorted in increasing order.  
-#' @param iso Should the quantile estimates be passed through isotonic
-#'   regression? Default is FALSE; if TRUE, takes priority over
-#'   \code{sort}. Note: this option only makes sense if the values in the stored 
-#'   \code{tau} vector are distinct, and sorted in increasing order.  
-#' @param nonneg: should the quantile estimates be truncated at 0? Natural for
-#'   count data. Default is FALSE. 
-#' @param round: should the quantile estimates be rounded? Natural for count
-#'   data. Default is FALSE.
+#' @param sort Should the returned quantile estimates be sorted? Default is
+#'   FALSE. Note: this option only makes sense if the values in the stored
+#'   \code{tau} vector are distinct, and sorted in increasing order.
+#' @param iso Should the returned quantile estimates be passed through isotonic
+#'   regression? Default is FALSE; if TRUE, takes priority over \code{sort}.
+#'   Note: this option only makes sense if the values in the stored \code{tau}
+#'   vector are distinct, and sorted in increasing order.
+#' @param nonneg Should the returned quantile estimates be truncated at 0?
+#'   Natural for count data. Default is FALSE.
+#' @param round Should the returned quantile estimates be rounded? Natural for
+#'   count data. Default is FALSE.
 #' 
 #' @export
 
@@ -338,9 +338,10 @@ predict.quantile_genlasso = function(obj, newx, s=NULL, sort=FALSE, iso=FALSE,
   }
   
   # Run isotonic regression, sort, truncated, round, if we're asked to
-  for (i in 1:nrow(z)) {
-    if (sort) z[i,] = sort(z[i,])
-    if (iso) z[i,] = isoreg(z[i,])$yf
+  for (i in 1:n0) {
+    o = which(!is.na(z[i,]))
+    if (sort && !iso) z[i,o] = sort(z[i,o])
+    if (iso) z[i,o] = isoreg(z[i,o])$yf
   }
   if (nonneg) z = pmax(z,0)
   if (round) z = round(z)
@@ -448,7 +449,7 @@ get_lambda_seq = function(x, y, d=NULL, nlambda, lambda_min_ratio) {
 #' Predict function for quantile_genlasso_grid object
 #' 
 #' Predict the conditional quantiles at a new set of predictor variables, using
-#' the generalized lasso coefficients at particular tau or lambda values.
+#' the generalized lasso coefficients at given tau or lambda values.
 #'
 #' @details This function operates as in the \code{predict.quantile_genlasso} 
 #'   function for a \code{quantile_genlasso} object, but with a few key
@@ -486,8 +487,9 @@ predict.quantile_genlasso_grid = function(obj, newx, sort=FALSE, iso=FALSE,
   # Run isotonic regression, sort, truncated, round, if we're asked to
   for (i in 1:dim(z)[1]) {
     for (j in 1:dim(z)[2]) {
-      if (sort) z[i,j,] = sort(z[i,j,])
-      if (iso) z[i,j,] = isoreg(z[i,j,])$yf
+      o = which(!is.na(z[i,j,]))
+      if (sort && !iso) z[i,j,o] = sort(z[i,j,o])
+      if (iso) z[i,j,o] = isoreg(z[i,j,o])$yf
     }
   }
   if (nonneg) z = pmax(z,0)

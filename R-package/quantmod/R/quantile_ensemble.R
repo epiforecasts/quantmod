@@ -6,7 +6,8 @@
 #'   points) x (number or ensemble components) x (number of quantile levels).
 #' @param y Vector of responses (whose quantiles are being predicted by
 #'   \code{qarr}).  
-#' @param tau Vector of quantile levels at which predictions are made. 
+#' @param tau Vector of quantile levels at which predictions are made. Assumed
+#'   to be distinct, and sorted in increasing order.
 #' @param weights Vector of observation weights (to be used in the loss
 #'   function). Default is NULL, which is interpreted as a weight of 1 for each
 #'   observation.
@@ -25,7 +26,7 @@
 #'   TRUE. Note: this option only matters when there is more than group of
 #'   ensemble weights, as determined by \code{tau_groups}. See details. 
 #' @param q0 Array of points used to define the noncrossing
-#'   constraints. Must haev dimension (number of points) x (number of ensemble
+#'   constraints. Must have dimension (number of points) x (number of ensemble
 #'   components) x (number of quantile levels). Default is NULL, which means
 #'   that we consider noncrossing constraints at the training points
 #'   \code{qarr}. 
@@ -371,4 +372,103 @@ quantile_ensemble_flex = function(qarr, y, tau, weights, tau_groups,
   }
 
   return(enlist(alpha, status))
+}
+
+
+##############################
+
+#' Coef function for quantile_ensemble object
+#'
+#' Retrieve ensemble coefficients for estimating the conditional quantiles at
+#' given tau values.  
+#' 
+#' @param obj The \code{quantile_ensemble} object.
+#' 
+#' @export
+
+coef.quantile_ensemble = function(obj) {
+  return(obj$alpha)
+}
+
+##############################
+
+#' Predict function for quantile_ensemble object
+#'
+#' Predict the conditional quantiles at a new set of ensemble realizations,
+#' using 
+#' the ensemble coefficients at given tau values.
+#' 
+#' @param obj The \code{quantile_ensemble} object.
+#' @param newq Array of new predicted quantiles, of dimension (number of new
+#'   prediction points) x (number or ensemble components) x (number of quantile
+#'   levels).
+#' @param sort Should the returned quantile estimates be sorted? Default is
+#'   TRUE.
+#' @param iso Should the returned quantile estimates be passed through isotonic
+#'   regression? Default is FALSE; if TRUE, takes priority over \code{sort}.
+#' @param nonneg Should the returned quantile estimates be truncated at 0?
+#'   Natural for count data. Default is FALSE.
+#' @param round Should the returned quantile estimates be rounded? Natural for 
+#'   count data. Default is FALSE.
+#' 
+#' @export
+
+predict.quantile_ensemble = function(obj, newq, s=NULL, sort=TRUE, iso=FALSE, 
+                                     nonneg=FALSE, round=FALSE) {
+  newq = as.array(newq)
+  n0 = dim(newq)[1]
+  p = dim(newq)[2]
+  r = dim(newq)[3] 
+  
+  # Add an all 1s matrix to newq, if we need to
+  if (obj$intercept) {
+    a = array(NA, dim=c(n0,p+1,r))
+    for (k in 1:r) a[,,k] = cbind(rep(1,n0), newq[,,k])  
+    newq = a
+    p = p+1
+  }
+
+  # Make predictions
+  z = matrix(NA, nrow=n0, ncol=r)
+  alpha = matrix(obj$alpha, nrow=p, ncol=r)
+  for (i in 1:n0) {
+    mat = t(newq[i,,]) %*% alpha
+    if (r == 1) z[i,] = mat
+    else z[i,] = diag(mat)
+  }
+
+  # Run isotonic regression, sort, truncated, round, if we're asked to
+  for (i in 1:n0) {
+    o = which(!is.na(z[i,]))
+    if (sort && !iso) z[i,o] = sort(z[i,o])
+    if (iso) z[i,o] = isoreg(z[i,o])$yf
+  }
+  if (nonneg) z = pmax(z,0)
+  if (round) z = round(z)
+  return(z)
+}
+
+##############################
+
+#' Combine matrices into an array
+#'
+#' Combine (say) p matrices, each of dimension n x r, into an n x p x r array. 
+#' 
+#' @param mat First matrix to combine into an array. Alternatively, a list of
+#'   matrices to combine into an array.
+#' @param ... Additional matrices to combine into an array. These additional
+#'   arguments will be ignored if \code{mat} is a list.
+#' 
+#' @export
+
+combine_into_array = function(mat, ...) {
+  if (is.list(mat)) mat_list = mat
+  else mat_list = c(list(mat), list(...))
+
+  n = nrow(mat_list[[1]])
+  r = ncol(mat_list[[1]])
+  p = length(mat_list)
+  a = array(NA, dim=c(n,p,r))
+  for (j in 1:p) a[,j,] = mat_list[[j]]
+  return(a)
 }
