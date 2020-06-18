@@ -15,12 +15,13 @@ install_github(repo="cmu-delphi/quantmod", subdir="R-package/quantmod")
 ### Install Gurobi for R
 
 - First install the latest version of Gurobi optimizer
-[here](https://www.gurobi.com/products/gurobi-optimizer/); for academics, you
-can obtain a free license
-[here](https://www.gurobi.com/academia/academic-program-and-licenses/). 
+  [here](https://www.gurobi.com/products/gurobi-optimizer/); for academics, you
+  can obtain a free license
+  [here](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
-- For R <= 3.6.1, you can then follow [these instructions] to install the Gurobi
-  R package. 
+- For R <= 3.6.1, you can then follow
+  [these instructions](https://www.gurobi.com/documentation/9.0/refman/ins_the_r_package.html)
+  to install the Gurobi R package.
 
 - For R > 3.6.1, you will have to download the Gurobi R package directly from
   [this link](https://upload.gurobi.com/gurobiR/gurobi9.0.2_R.tar.gz), and build
