@@ -9,7 +9,7 @@ To install the quantmod R package directly from github, run the following in R:
 
 ```{r}
 library(devtools)
-install_github(repo="cmu-delphi/quantmod", subdir="R-package/quantmod")
+install_github(repo="cmu-delphi/quantmod", subdir="R-package/quantmod", ref="main")
 ```
 
 ### Install Gurobi for R
