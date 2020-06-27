@@ -68,18 +68,18 @@ quantile_lasso = function(x, y, tau, lambda, weights=NULL, no_pen_vars=c(),
                           time_limit=NULL, warm_starts=TRUE, params=list(),
                           transform=NULL, inv_trans=NULL, jitter=NULL,
                           verbose=FALSE) {
-  # Define a diagonal penalty matrix 
-  x = as.matrix(x)
+  # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
+  if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
 
   # Now just call quantile_genlasso
   obj = quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda,
-                          weights=weights, no_pen_rows=no_pen_vars,
-                          intercept=intercept, standardize=standardize,
-                          noncross=noncross, x0=x0, lp_solver=lp_solver,
-                          time_limit=time_limit, warm_starts=warm_starts,
-                          params=params, transform=transform,
-                          inv_trans=inv_trans, jitter=jitter, verbose=verbose)
+                          weights=weights, intercept=intercept,
+                          standardize=standardize, noncross=noncross, x0=x0,
+                          lp_solver=lp_solver, time_limit=time_limit,
+                          warm_starts=warm_starts, params=params,
+                          transform=transform, inv_trans=inv_trans,
+                          jitter=jitter, verbose=verbose)
   class(obj) = c("quantile_lasso", class(obj))
   return(obj)
 }
@@ -115,20 +115,20 @@ quantile_lasso_grid = function(x, y, tau, lambda=NULL, nlambda=30,
                                time_limit=NULL, warm_starts=TRUE, params=list(),
                                transform=NULL, inv_trans=NULL, jitter=NULL,
                                verbose=FALSE) { 
-  # Define a diagonal penalty matrix 
-  x = as.matrix(x)
+  # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
+  if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
 
   # Now just call quantile_genlasso_grid
   obj = quantile_genlasso_grid(x=x, y=y, d=d, tau=tau, lambda=lambda,
                                nlambda=nlambda,
                                lambda_min_ratio=lambda_min_ratio,
-                               weights=weights, no_pen_rows=no_pen_vars,
-                               intercept=intercept, standardize=standardize,
-                               lp_solver=lp_solver, time_limit=time_limit,
-                               warm_starts=warm_starts, params=params,
-                               transform=transform, inv_trans=inv_trans,
-                               jitter=jitter, verbose=verbose)
+                               weights=weights, intercept=intercept,
+                               standardize=standardize, lp_solver=lp_solver,
+                               time_limit=time_limit, warm_starts=warm_starts,
+                               params=params, transform=transform,
+                               inv_trans=inv_trans, jitter=jitter,
+                               verbose=verbose)
   class(obj) = c("quantile_lasso_grid", class(obj))
   return(obj)
 }
@@ -178,15 +178,15 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
                              warm_starts=TRUE, params=list(), transform=NULL,
                              inv_trans=NULL, jitter=NULL, verbose=FALSE,
                              sort=FALSE, iso=FALSE, nonneg=FALSE, round=FALSE) {  
-  # Define a diagonal penalty matrix 
-  x = as.matrix(x)
+  # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
+  if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
 
   # Now just call cv_quantile_genlasso
   obj = cv_quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda,
                              nlambda=nlambda, lambda_min_ratio=lambda_min_ratio,
-                             weights=weights, no_pen_rows=no_pen_vars,
-                             nfolds=nfolds, train_test_inds=train_test_inds,
+                             weights=weights, nfolds=nfolds,
+                             train_test_inds=train_test_inds,
                              intercept=intercept, standardize=standardize,
                              lp_solver=lp_solver, time_limit=time_limit,
                              warm_starts=warm_starts, params=params,
@@ -227,7 +227,7 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
 #'   \code{tau_new}, a (very) roughly-CV-optimal tuning parameter value, then   
 #'   calls \code{quantile_lasso} at the new quantile levels and corresponding 
 #'   tuning parameter values. If not specified, the arguments \code{weights},
-#'   \code{no_pen_rows}, \code{intercept}, \code{standardize}, \code{lp_solver},
+#'   \code{no_pen_vars}, \code{intercept}, \code{standardize}, \code{lp_solver},
 #'   \code{time_limit}, \code{warm_start}, \code{params}, \code{transform},
 #'   \code{inv_transorm}, \code{jitter} are all inherited from the given
 #'   \code{cv_quantile_lasso} object. 
@@ -236,21 +236,21 @@ cv_quantile_lasso = function(x, y, tau, lambda=NULL, nlambda=30,
 
 refit_quantile_lasso = function(obj, x, y, tau_new=c(0.01, 0.025, seq(0.05,
                                 0.95, by=0.05), 0.975, 0.99), weights=NULL,
-                                no_pen_rows=NULL, intercept=TRUE,
+                                no_pen_vars=NULL, intercept=TRUE,
                                 standardize=TRUE, noncross=FALSE, x0=NULL,
                                 lp_solver=NULL, time_limit=NULL,
                                 warm_starts=NULL, params=NULL, transform=NULL,
                                 inv_trans=NULL, jitter=NULL, verbose=FALSE) {
-  # Define a diagonal penalty matrix 
-  x = as.matrix(x)
+  # Define an identity penalty matrix 
   d = Diagonal(ncol(x))
+  if (length(no_pen_vars) > 0) d = d[-no_pen_vars,]
 
   # Now just call refit_quantile_genlasso
   ql_obj = refit_quantile_genlasso(obj=obj, x=x, y=y, d=d, tau_new=tau_new,
-                                   weights=weights, no_pen_rows=no_pen_rows,
-                                   intercept=intercept, standardize=standardize,
-                                   noncross=noncross, x0=x0,
-                                   lp_solver=lp_solver, time_limit=time_limit,
+                                   weights=weights, intercept=intercept,
+                                   standardize=standardize, noncross=noncross,
+                                   x0=x0, lp_solver=lp_solver,
+                                   time_limit=time_limit,
                                    warm_starts=warm_starts, params=params,
                                    transform=transform, inv_trans=inv_trans,
                                    jitter=jitter, verbose=verbose)

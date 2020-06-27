@@ -40,6 +40,35 @@ enlist = function(...) {
   return(result)
 }
 
+# Setup function
+setup_xyd = function(x, y, d, intercept=TRUE, standardize=TRUE, transform=NULL) {
+  n = nrow(x)
+  p = ncol(x)
+  m = nrow(d)
+  bx = NULL
+  sx = NULL
+
+  # Standardize the columns of x, if we're asked to
+  if (standardize) {
+    bx = apply(x,2,mean)
+    sx = apply(x,2,sd)
+    sx[sx < sqrt(.Machine$double.eps)] = 1 # Don't divide by zero!
+    x = scale(x,bx,sx)
+  }
+
+  # Add all 1s column to x, and all 0s column to d, if we need to 
+  if (intercept) {
+    x = cbind(rep(1,n), x)
+    d = cbind(rep(0,m), d)
+    p = p+1
+  }
+
+  # Transform y, if we're asked to
+  if (!is.null(transform)) y = transform(y)
+
+  return(enlist(x, y, d, bx, sx))
+}
+
 #' Quantile loss
 #'
 #' Compute the quantile (tilted absolute) loss for a single tau value. 

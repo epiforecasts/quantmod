@@ -4,7 +4,9 @@
 \alias{get_lambda_seq}
 \title{Lambda sequence for quantile generalized lasso}
 \usage{
-get_lambda_seq(x, y, d = NULL, nlambda, lambda_min_ratio)
+get_lambda_seq(x, y, d, nlambda, lambda_min_ratio, weights = NULL,
+  intercept = TRUE, standardize = TRUE, lp_solver = c("gurobi",
+  "glpk"), transform = NULL)
 }
 \description{
 Compute a lambda sequence for a quantile generalized lasso problem.

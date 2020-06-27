@@ -36,27 +36,24 @@
 #' @export
 
 cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
-                                lambda_min_ratio=1e-3, weights=NULL,
-                                no_pen_rows=c(), nfolds=5, train_test_inds=NULL,
-                                intercept=TRUE, standardize=TRUE,
-                                lp_solver=c("gurobi","glpk"), time_limit=NULL,
-                                warm_starts=TRUE, params=list(), transform=NULL,
-                                inv_trans=NULL, jitter=NULL, verbose=FALSE,
-                                sort=FALSE, iso=FALSE, nonneg=FALSE,
-                                round=FALSE) {  
-  # Set up some basics
-  x = as.matrix(x)
-  y = as.numeric(y)
-  d = as.matrix(d)
-  n = nrow(x)
-  p = ncol(x)
-  m = nrow(d)
-  if (is.null(weights)) weights = rep(1,n)
+                                lambda_min_ratio=1e-3, weights=NULL, nfolds=5,
+                                train_test_inds=NULL, intercept=TRUE,
+                                standardize=TRUE, lp_solver=c("gurobi","glpk"),
+                                time_limit=NULL, warm_starts=TRUE,
+                                params=list(), transform=NULL, inv_trans=NULL,
+                                jitter=NULL, verbose=FALSE, sort=FALSE,
+                                iso=FALSE, nonneg=FALSE, round=FALSE) {
+  # Check arguments
+  if (is.null(weights)) weights = rep(1,length(y))
   lp_solver = match.arg(lp_solver)
-
+  
   # Set the lambda sequence, if we need to
-  if (is.null(lambda)) lambda = get_lambda_seq(x, y, d, nlambda,
-                                               lambda_min_ratio) 
+  if (is.null(lambda)) {
+    lambda = get_lambda_seq(x=x, y=y, d=d, nlambda=nlambda,
+                            lambda_min_ratio=lambda_min_ratio, weights=weights,
+                            standardize=standardize, intercept=intercept,
+                            lp_solver=lp_solver, transform=transform)
+  }  
 
   # Grab the specified training and test inds, or else build them 
   if (!is.null(train_test_inds)) {
@@ -81,12 +78,11 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
                                  d=d, tau=tau, lambda=lambda, nlambda=NULL,
                                  lambda_min_ratio=NULL,
                                  weights=weights[train[[k]]],
-                                 no_pen_rows=no_pen_rows, intercept=intercept,
-                                 standardize=standardize, lp_solver=lp_solver,
-                                 time_limit=time_limit, warm_starts=warm_starts,
-                                 params=params, transform=transform,
-                                 inv_trans=inv_trans, jitter=jitter,
-                                 verbose=verbose)
+                                 intercept=intercept, standardize=standardize,
+                                 lp_solver=lp_solver, time_limit=time_limit,
+                                 warm_starts=warm_starts, params=params,
+                                 transform=transform, inv_trans=inv_trans,
+                                 jitter=jitter, verbose=verbose)
     # Predict on test set
     yhat[test[[k]],,] = predict(obj, x[test[[k]],,drop=FALSE], sort=sort,
                                 iso=iso, nonneg=nonneg, round=round)
@@ -105,13 +101,12 @@ cv_quantile_genlasso = function(x, y, d, tau, lambda=NULL, nlambda=30,
   # Fit quantile genlasso object on full training set, with optimum lambdas
   if (verbose) cat("Refitting on full training set with optimum lambdas ...\n")
   qgl_obj = quantile_genlasso(x=x, y=y, d=d, tau=tau, lambda=lambda_min,
-                              weights=weights, no_pen_rows=no_pen_rows,
-                              intercept=intercept, standardize=standardize,  
-                              noncross=FALSE, x0=NULL, lp_solver=lp_solver, 
-                              time_limit=time_limit, warm_starts=warm_starts, 
-                              params=params, transform=transform,
-                              inv_trans=inv_trans, jitter=jitter,
-                              verbose=verbose) 
+                              weights=weights, intercept=intercept,
+                              standardize=standardize, noncross=FALSE, x0=NULL,
+                              lp_solver=lp_solver, time_limit=time_limit,
+                              warm_starts=warm_starts, params=params,
+                              transform=transform, inv_trans=inv_trans,
+                              jitter=jitter, verbose=verbose)
   obj = enlist(qgl_obj, cv_mat, lambda_min, tau, lambda)
   class(obj) = "cv_quantile_genlasso"
   return(obj)
@@ -187,21 +182,21 @@ predict.cv_quantile_genlasso = function(obj, newx, s=NULL, sort=FALSE, iso=FALSE
 #'   \code{tau_new}, a (very) roughly-CV-optimal tuning parameter value, then   
 #'   calls \code{quantile_genlasso} at the new quantile levels and corresponding 
 #'   tuning parameter values. If not specified, the arguments \code{weights},
-#'   \code{no_pen_rows}, \code{intercept}, \code{standardize}, \code{lp_solver},
-#'   \code{time_limit}, \code{warm_starts}, \code{params}, \code{transform}, 
-#'   \code{inv_transorm}, \code{jitter} are all inherited from the given
-#'   \code{cv_quantile_genlasso} object. 
+#'   \code{intercept}, \code{standardize}, \code{lp_solver}, \code{time_limit},
+#'   \code{warm_starts}, \code{params}, \code{transform}, \code{inv_transorm},
+#'   \code{jitter} are all inherited from the given \code{cv_quantile_genlasso}
+#'   object.
 #' 
 #' @export
 
 refit_quantile_genlasso = function(obj, x, y, d, tau_new=c(0.01, 0.025,
                                    seq(0.05, 0.95, by=0.05), 0.975, 0.99),
-                                   weights=NULL, no_pen_rows=NULL,
-                                   intercept=TRUE, standardize=TRUE,
-                                   noncross=FALSE, x0=NULL, lp_solver=NULL,
-                                   time_limit=NULL, warm_starts=NULL,
-                                   params=NULL, transform=NULL, inv_trans=NULL,
-                                   jitter=NULL, verbose=FALSE) {
+                                   weights=NULL, intercept=TRUE,
+                                   standardize=TRUE, noncross=FALSE, x0=NULL,
+                                   lp_solver=NULL, time_limit=NULL,
+                                   warm_starts=NULL, params=NULL,
+                                   transform=NULL, inv_trans=NULL, jitter=NULL,
+                                   verbose=FALSE) {
   # For each new tau, find the nearest tau, and use its CV-optimal lambda  
   tau = obj$tau
   lambda = obj$lambda_min
@@ -211,7 +206,6 @@ refit_quantile_genlasso = function(obj, x, y, d, tau_new=c(0.01, 0.025,
 
   # If not specified, inherit from the stored object 
   if (is.null(weights)) weights = obj$qgl_obj$weights
-  if (is.null(no_pen_rows)) no_pen_rows = obj$qgl_obj$no_pen_rows
   if (is.null(intercept)) intercept = obj$qgl_obj$intercept
   if (is.null(standardize)) standardize = obj$qgl_obj$standardize
   if (is.null(lp_solver)) lp_solver = obj$qgl_obj$lp_solver
@@ -224,10 +218,10 @@ refit_quantile_genlasso = function(obj, x, y, d, tau_new=c(0.01, 0.025,
 
   # Now just call quantile_genlasso
   return(quantile_genlasso(x=x, y=y, d=d, tau=tau_new, lambda=lambda_new,
-                           weights=weights, no_pen_rows=no_pen_rows,
-                           intercept=intercept, standardize=standardize,
-                           noncross=noncross, x0=x0, lp_solver=lp_solver,
-                           time_limit=time_limit, warm_starts=warm_starts,
-                           params=params, transform=transform,
-                           inv_trans=inv_trans, jitter=jitter, verbose=verbose)) 
+                           weights=weights, intercept=intercept,
+                           standardize=standardize, noncross=noncross, x0=x0,
+                           lp_solver=lp_solver, time_limit=time_limit,
+                           warm_starts=warm_starts, params=params,
+                           transform=transform, inv_trans=inv_trans,
+                           jitter=jitter, verbose=verbose))
 }

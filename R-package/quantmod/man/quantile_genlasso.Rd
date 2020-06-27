@@ -5,11 +5,10 @@
 \title{Quantile generalized lasso}
 \usage{
 quantile_genlasso(x, y, d, tau, lambda, weights = NULL,
-  no_pen_rows = c(), intercept = TRUE, standardize = TRUE,
-  noncross = FALSE, x0 = NULL, lp_solver = c("gurobi", "glpk"),
-  time_limit = NULL, warm_starts = TRUE, params = list(),
-  transform = NULL, inv_trans = NULL, jitter = NULL,
-  verbose = FALSE)
+  intercept = TRUE, standardize = TRUE, noncross = FALSE,
+  x0 = NULL, lp_solver = c("gurobi", "glpk"), time_limit = NULL,
+  warm_starts = TRUE, params = list(), transform = NULL,
+  inv_trans = NULL, jitter = NULL, verbose = FALSE)
 }
 \arguments{
 \item{x}{Matrix of predictors. If sparse, then passing it an appropriate 
@@ -33,10 +32,6 @@ sequence of tau values and one lambda value.}
 \item{weights}{Vector of observation weights (to be used in the loss
 function). Default is NULL, which is interpreted as a weight of 1 for each
 observation.}
-
-\item{no_pen_rows}{Indices of the rows of \code{d} that should be excluded 
-from the generalized lasso penalty. Default is \code{c()}, which means that
-no rows are to be excluded.}
 
 \item{intercept}{Should an intercept be included in the regression model?
 Default is TRUE.}
@@ -102,7 +97,7 @@ A list with the following components:
   \item status: vector of status flags returned by Gurobi's or GLPK's LP
   solver, of length = (number of quantile levels)
   \item tau, lambda: vectors of tau and lambda values used
-  \item weights, no_pen_rows, ..., jitter: values of these other arguments
+  \item weights, intercept, ..., jitter: values of these other arguments
   used  in the function call  
   }
 }

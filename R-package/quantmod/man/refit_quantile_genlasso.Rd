@@ -5,11 +5,11 @@
 \title{Refit function for cv_quantile_genlasso object}
 \usage{
 refit_quantile_genlasso(obj, x, y, d, tau_new = c(0.01, 0.025, seq(0.05,
-  0.95, by = 0.05), 0.975, 0.99), weights = NULL, no_pen_rows = NULL,
-  intercept = TRUE, standardize = TRUE, noncross = FALSE,
-  x0 = NULL, lp_solver = NULL, time_limit = NULL,
-  warm_starts = NULL, params = NULL, transform = NULL,
-  inv_trans = NULL, jitter = NULL, verbose = FALSE)
+  0.95, by = 0.05), 0.975, 0.99), weights = NULL, intercept = TRUE,
+  standardize = TRUE, noncross = FALSE, x0 = NULL,
+  lp_solver = NULL, time_limit = NULL, warm_starts = NULL,
+  params = NULL, transform = NULL, inv_trans = NULL, jitter = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{obj}{The \code{cv_quantile_genlasso} object to start from.}
@@ -49,8 +49,8 @@ This function simply infers, for each quantile level in
   \code{tau_new}, a (very) roughly-CV-optimal tuning parameter value, then   
   calls \code{quantile_genlasso} at the new quantile levels and corresponding 
   tuning parameter values. If not specified, the arguments \code{weights},
-  \code{no_pen_rows}, \code{intercept}, \code{standardize}, \code{lp_solver},
-  \code{time_limit}, \code{warm_starts}, \code{params}, \code{transform}, 
-  \code{inv_transorm}, \code{jitter} are all inherited from the given
-  \code{cv_quantile_genlasso} object.
+  \code{intercept}, \code{standardize}, \code{lp_solver}, \code{time_limit},
+  \code{warm_starts}, \code{params}, \code{transform}, \code{inv_transorm},
+  \code{jitter} are all inherited from the given \code{cv_quantile_genlasso}
+  object.
 }
