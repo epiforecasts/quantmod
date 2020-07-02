@@ -5,7 +5,8 @@ Version: 1.0.0
 Date: 2020-06-06
 Author: Ryan Tibshirani
 Maintainer: Ryan Tibshirani <ryantibs@stat.cmu.edu>
-Depends: Matrix, gurobi
+Depends: Matrix
+Suggests: gurobi
 Description: Tools for quantile modeling: penalized quantile regression, time series, cross-validation, and ensembles.    
 License: GPL-2
 RoxygenNote: 6.1.1
